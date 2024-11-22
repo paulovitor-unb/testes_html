@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Marketplace - Session</title>
+    </head>
+    <body>
+        <input type="text" id="base-url" />
+        <select id="api-version">
+            <option value="v1">v1</option>
+        </select>
+        <button onclick="get('/users/session');">User</button>
+        <input type="text" id="api-key" />
+        <script src="./fetch.js"></script>
+        <script>
+            async function get(endpoint) {
+                const { data } = await fetchService(endpoint);
+                console.log(data);
+            }
+        </script>
+    </body>
+</html>

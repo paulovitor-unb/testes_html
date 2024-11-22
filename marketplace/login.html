@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Marketplace - Login</title>
+    </head>
+    <body>
+        <input type="text" id="base-url" />
+        <select id="api-version">
+            <option value="v1">v1</option>
+        </select>
+        <input type="text" id="api-key" />
+        <button onclick="setUser();">Login</button>
+        <script src="./fetch.js"></script>
+        <script>
+            async function setUser() {
+                const { status, data } = await fetchService(
+                    "/users/session",
+                    "POST",
+                    {
+                        data: { idStripe: "qwerty", taxId: "asdf" },
+                        frontend: { idStripe: "qwerty", taxId: "asdf" }
+                    }
+                );
+
+                if (status === 200) {
+                    return window.location.assign("./session.html");
+                }
+
+                console.log({ status, data });
+            }
+        </script>
+    </body>
+</html>
