@@ -28,8 +28,8 @@
         </div>
 
         <div>
-            <label for="redirect-url">Redirect URL:</label>
-            <input type="text" id="redirect-url" />
+            <label for="after-checkout-url">After Checkout URL:</label>
+            <input type="text" id="after-checkout-url" />
         </div>
 
         <div>
@@ -108,19 +108,14 @@
                 const { status, data } = await fetchService(
                     "/payments/checkout",
                     "POST",
-                    { price, trial }
+                    {
+                        price,
+                        trial,
+                        afterCheckoutUrl:
+                            document.querySelector("#after-checkout-url")
+                                .value || null
+                    }
                 );
-
-                if (
-                    status === 200 &&
-                    document.querySelector("#redirect-url").value
-                ) {
-                    return window.location.assign(
-                        document.querySelector("#redirect-url").value
-                    );
-                }
-
-                console.log({ status, data });
             }
         </script>
     </body>
