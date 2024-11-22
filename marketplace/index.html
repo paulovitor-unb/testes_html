@@ -48,7 +48,6 @@
                 const { status, data } = await fetchService("/products");
 
                 if (status >= 400) {
-                    console.log({ status, data });
                     return;
                 }
 
@@ -116,6 +115,12 @@
                                 .value || null
                     }
                 );
+
+                if (status >= 400) {
+                    return;
+                }
+
+                window.location.assign(data);
             }
         </script>
     </body>

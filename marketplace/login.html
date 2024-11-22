@@ -24,11 +24,11 @@
                     }
                 );
 
-                if (status === 200) {
-                    return window.location.assign("./session.html");
+                if (status >= 400) {
+                    return;
                 }
 
-                console.log({ status, data });
+                window.location.assign("./session.html");
             }
         </script>
     </body>
