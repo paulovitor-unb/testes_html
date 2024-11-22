@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Marketplace - API</title>
+
+        <style>
+            div {
+                margin-bottom: 1rem;
+            }
+
+            #products button {
+                margin-right: 0.5rem;
+            }
+        </style>
+    </head>
+    <body>
+        <div>
+            <label for="base-url">Base URL:</label>
+            <input type="text" id="base-url" />
+            <label for="api-version">API Version:</label>
+            <select id="api-version">
+                <option value="v1">v1</option>
+            </select>
+            <label for="api-key">API Key:</label>
+            <input type="text" id="api-key" />
+        </div>
+
+        <div>
+            <label for="redirect-url">Redirect URL:</label>
+            <input type="text" id="redirect-url" />
+        </div>
+
+        <div>
+            <label>Products:</label>
+            <button id="load-button">Load</button>
+        </div>
+
+        <div id="products"></div>
+
+        <script src="./fetch.js"></script>
+        <script>
+            const loadButton = document.querySelector("#load-button");
+            loadButton.addEventListener("click", getProducts);
+
+            async function getProducts() {
+                const { status, data } = await fetchService("/products");
+
+                if (status >= 400) {
+                    console.log({ status, data });
+                    return;
+                }
+
+                loadButton.parentElement.style.display = "none";
+
+                const productsDiv = document.querySelector("#products");
+                for (const product of data) {
+                    const productDiv = document.createElement("div");
+                    productDiv.id = product._id;
+
+                    const productLabel = document.createElement("label");
+                    productLabel.innerText = `${product.name}: `;
+                    productDiv.appendChild(productLabel);
+
+                    if (product.allowsTrial) {
+                        createPriceButton(
+                            product.defaultPrice,
+                            true,
+                            "Trial",
+                            productDiv
+                        );
+                    }
+
+                    for (const price of product.prices) {
+                        const buttonText = `Value: ${new Intl.NumberFormat(
+                            "pt-BR",
+                            {
+                                style: "currency",
+                                currency: price.currency
+                            }
+                        ).format(price.unitAmount)}${
+                            price.interval ? `/${price.interval}` : ""
+                        }`;
+
+                        createPriceButton(
+                            price._id,
+                            false,
+                            buttonText,
+                            productDiv
+                        );
+                    }
+
+                    productsDiv.appendChild(productDiv);
+                }
+            }
+
+            function createPriceButton(priceId, trial, buttonText, productDiv) {
+                const purchaseButton = document.createElement("button");
+                purchaseButton.innerText = buttonText;
+                purchaseButton.addEventListener("click", function () {
+                    setCheckout(priceId, trial);
+                });
+                productDiv.appendChild(purchaseButton);
+            }
+
+            async function setCheckout(price, trial) {
+                const { status, data } = await fetchService(
+                    "/payments/checkout",
+                    "POST",
+                    { price, trial }
+                );
+
+                if (
+                    status === 200 &&
+                    document.querySelector("#redirect-url").value
+                ) {
+                    return window.location.assign(
+                        document.querySelector("#redirect-url").value
+                    );
+                }
+
+                console.log({ status, data });
+            }
+        </script>
+    </body>
+</html>
