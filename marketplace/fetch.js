@@ -7,10 +7,7 @@ async function fetchService(endpoint, method = "GET", data = null) {
         const response = await fetch(url, {
             method,
             body: data ? JSON.stringify(data) : null,
-            headers: {
-                ["Content-Type"]: "application/json",
-                ["api-key"]: document.querySelector("#api-key").value
-            },
+            headers: { ["Content-Type"]: "application/json" },
             credentials: "include"
         });
 

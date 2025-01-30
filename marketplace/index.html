@@ -23,38 +23,113 @@
             <select id="api-version">
                 <option value="v1">v1</option>
             </select>
-            <label for="api-key">API Key:</label>
-            <input type="text" id="api-key" />
-        </div>
-
-        <div>
-            <label for="after-checkout-url">After Checkout URL:</label>
-            <input type="text" id="after-checkout-url" />
         </div>
 
         <div>
             <label>Products:</label>
-            <button id="load-button">Load</button>
+            <button id="load-products-button">Load products</button>
+            <button id="load-all-button">Load all</button>
         </div>
 
         <div id="products"></div>
 
         <script src="./fetch.js"></script>
         <script>
-            const loadButton = document.querySelector("#load-button");
-            loadButton.addEventListener("click", getProducts);
+            const loadProductsButton = document.querySelector(
+                "#load-products-button"
+            );
+            loadProductsButton.addEventListener("click", loadProducts);
 
-            async function getProducts() {
-                const { status, data } = await fetchService("/products");
+            async function loadProducts() {
+                const { status, data: products } = await fetchService(
+                    "/products"
+                );
 
                 if (status >= 400) {
                     return;
                 }
 
-                loadButton.parentElement.style.display = "none";
+                loadProductsButton.parentElement.style.display = "none";
 
                 const productsDiv = document.querySelector("#products");
-                for (const product of data) {
+                for (const product of products) {
+                    const productDiv = document.createElement("div");
+                    productDiv.id = product._id;
+
+                    const productLabel = document.createElement("label");
+                    productLabel.innerText = `${product.name}: `;
+                    productDiv.appendChild(productLabel);
+
+                    const loadPricesButton = document.createElement("button");
+                    loadPricesButton.innerText = "Load prices";
+                    loadPricesButton.dataset.product = product.name;
+                    loadPricesButton.addEventListener("click", function () {
+                        getPrices(product.name);
+                    });
+                    productDiv.appendChild(loadPricesButton);
+
+                    productsDiv.appendChild(productDiv);
+                }
+            }
+
+            async function getPrices(productName) {
+                const loadPricesButton = document.querySelector(
+                    `button[data-product="${productName}"]`
+                );
+                loadPricesButton.addEventListener("click", loadProducts);
+
+                const { status, data: product } = await fetchService(
+                    `/products?product=${productName}`
+                );
+
+                if (status >= 400) {
+                    return;
+                }
+
+                loadPricesButton.style.display = "none";
+
+                const productDiv = loadPricesButton.parentElement;
+
+                if (product.allowsTrial) {
+                    createPriceButton(
+                        product.defaultPrice,
+                        true,
+                        "Trial",
+                        productDiv
+                    );
+                }
+
+                for (const price of product.prices) {
+                    const buttonText = `Value: ${new Intl.NumberFormat(
+                        "pt-BR",
+                        {
+                            style: "currency",
+                            currency: price.currency
+                        }
+                    ).format(price.unitAmount)}${
+                        price.interval ? `/${price.interval}` : ""
+                    }`;
+
+                    createPriceButton(price._id, false, buttonText, productDiv);
+                }
+            }
+
+            const loadAllButton = document.querySelector("#load-all-button");
+            loadAllButton.addEventListener("click", loadAll);
+
+            async function loadAll() {
+                const { status, data: products } = await fetchService(
+                    "/products"
+                );
+
+                if (status >= 400) {
+                    return;
+                }
+
+                loadProductsButton.parentElement.style.display = "none";
+
+                const productsDiv = document.querySelector("#products");
+                for (const product of products) {
                     const productDiv = document.createElement("div");
                     productDiv.id = product._id;
 
@@ -120,7 +195,7 @@
                     return;
                 }
 
-                window.location.assign(data);
+                window.location.assign(data.redirectUrl);
             }
         </script>
     </body>
