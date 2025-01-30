@@ -79,7 +79,7 @@
                 loadPricesButton.addEventListener("click", loadProducts);
 
                 const { status, data: product } = await fetchService(
-                    `/products?product=${productName}`
+                    `/products/${productName}`
                 );
 
                 if (status >= 400) {
