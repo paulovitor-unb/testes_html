@@ -178,17 +178,11 @@
                 productDiv.appendChild(purchaseButton);
             }
 
-            async function setCheckout(price, trial) {
+            async function setCheckout(priceId, trial) {
                 const { status, data } = await fetchService(
                     "/payments/checkout",
                     "POST",
-                    {
-                        price,
-                        trial,
-                        afterCheckoutUrl:
-                            document.querySelector("#after-checkout-url")
-                                .value || null
-                    }
+                    { priceId, trial }
                 );
 
                 if (status >= 400) {
